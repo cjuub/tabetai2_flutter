@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:connectanum/connectanum.dart';
+import 'package:connectanum/json.dart';
 
 void main() {
   runApp(MyApp());
@@ -9,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'tabetai2 client',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -26,7 +28,7 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'tabetai2 client'),
     );
   }
 }
@@ -50,17 +52,31 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  List<dynamic> _ingredients = [];
 
-  void _incrementCounter() {
+  void _update_ingredients(List<dynamic> arguments) async {
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
+      _ingredients = arguments;
     });
+  }
+
+  void _connect_wamp() async {
+    final client = Client(
+        realm: "realm1",
+        transport: WebSocketTransport(
+            "ws://localhost:9999/ws",
+            new Serializer(),
+            WebSocketSerialization.SERIALIZATION_JSON
+        )
+    );
+    final session = await client.connect().first;
+    final subscription = await session.subscribe('com.tabetai2.ingredients');
+    subscription.eventStream.listen((event) => _update_ingredients(event.arguments) );
   }
 
   @override
@@ -71,6 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+    _connect_wamp();
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -98,20 +116,15 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times:',
+              'The following ingredients were published:',
             ),
             Text(
-              '$_counter',
+              '$_ingredients',
               style: Theme.of(context).textTheme.headline4,
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
