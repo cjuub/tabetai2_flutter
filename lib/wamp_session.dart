@@ -6,11 +6,11 @@ class WampSession {
   Session _session;
 
   WampSession(String host) {
-    _client = new Client(
+    _client = Client(
         realm: "realm1",
-        transport: new WebSocketTransport(
+        transport: WebSocketTransport(
             "ws://" + host + ":9999/ws",
-            new Serializer(),
+            Serializer(),
             WebSocketSerialization.SERIALIZATION_JSON
         )
     );

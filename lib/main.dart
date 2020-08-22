@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'wamp_session.dart';
 
 void main() async {
-  var session = new WampSession("localhost");
+  var session = WampSession("localhost");
   await session.connect();
 
   runApp(MyApp(session));
