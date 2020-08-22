@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:connectanum/connectanum.dart';
-import 'package:connectanum/json.dart';
 
-void main() {
-  runApp(MyApp());
+import 'wamp_session.dart';
+
+void main() async {
+  var session = new WampSession("localhost");
+  await session.connect();
+
+  runApp(MyApp(session));
 }
 
 class MyApp extends StatelessWidget {
+  final WampSession _session;
+
+  MyApp(this._session);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -28,13 +35,15 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'tabetai2 client'),
+      home: HomePage(title: 'tabetai2 client', session: _session),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class HomePage extends StatefulWidget {
+  final WampSession session;
+
+  HomePage({Key key, this.title, this.session}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -48,35 +57,31 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _HomePageState createState() => _HomePageState(session);
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomePageState extends State<HomePage> {
+  final WampSession _session;
   List<dynamic> _ingredients = [];
 
-  void _update_ingredients(List<dynamic> arguments) async {
+  _HomePageState(this._session) {
+    _subscribeToTopics();
+  }
+
+  void _updateIngredients(List<dynamic> ingredientList) {
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _ingredients = arguments;
+      _ingredients = ingredientList;
     });
   }
 
-  void _connect_wamp() async {
-    final client = Client(
-        realm: "realm1",
-        transport: WebSocketTransport(
-            "ws://localhost:9999/ws",
-            new Serializer(),
-            WebSocketSerialization.SERIALIZATION_JSON
-        )
-    );
-    final session = await client.connect().first;
-    final subscription = await session.subscribe('com.tabetai2.ingredients');
-    subscription.eventStream.listen((event) => _update_ingredients(event.arguments) );
+  void _subscribeToTopics() async {
+    await _session.subscribe(
+        'com.tabetai2.ingredients', (data) => _updateIngredients(data));
   }
 
   @override
@@ -87,7 +92,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    _connect_wamp();
 
     return Scaffold(
       appBar: AppBar(
