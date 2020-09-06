@@ -62,10 +62,30 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final WampSession _session;
-  List<dynamic> _ingredients = [];
+  List<String> _ingredients = [];
+  List<String> _recipes = [];
+  int _currentIndex = 0;
+  Widget _scheduleView = Text('No schedule view yet!');
+  Widget _recipeListView = Text('No recipes to show');
+  Widget _ingredientListView = Text('No ingredients to show');
+
+  Widget _currentView;
 
   _HomePageState(this._session) {
     _subscribeToTopics();
+    _currentView = _scheduleView;
+  }
+
+  void _selectView(int value) {
+    _currentIndex = value;
+
+    if (_currentIndex == 0) {
+      _currentView = _scheduleView;
+    } else if (_currentIndex == 1) {
+      _currentView = _recipeListView;
+    } else if (_currentIndex == 2) {
+      _currentView = _ingredientListView;
+    }
   }
 
   void _updateIngredients(List<dynamic> ingredientList) {
@@ -75,13 +95,34 @@ class _HomePageState extends State<HomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _ingredients = ingredientList;
+      _ingredients = [];
+      for (dynamic ingredient in ingredientList) {
+        _ingredients.add(ingredient[1]);
+      }
+      _ingredientListView = Text('$_ingredients');
+    });
+  }
+
+  void _updateRecipes(List<dynamic> recipeList) {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _recipes = [];
+      for (dynamic recipe in recipeList) {
+        _recipes.add(recipe[1]);
+      }
+      _recipeListView = Text('$_recipes');
     });
   }
 
   void _subscribeToTopics() async {
     await _session.subscribe(
         'com.tabetai2.ingredients', (data) => _updateIngredients(data));
+    await _session.subscribe(
+        'com.tabetai2.recipes', (data) => _updateRecipes(data));
   }
 
   @override
@@ -92,6 +133,8 @@ class _HomePageState extends State<HomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -118,16 +161,35 @@ class _HomePageState extends State<HomePage> {
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'The following ingredients were published:',
-            ),
-            Text(
-              '$_ingredients',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+          children: <Widget>[_currentView],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _currentIndex,
+        backgroundColor: colorScheme.surface,
+        selectedItemColor: colorScheme.onSurface,
+        unselectedItemColor: colorScheme.onSurface.withOpacity(.60),
+        selectedLabelStyle: textTheme.caption,
+        unselectedLabelStyle: textTheme.caption,
+        onTap: (value) {
+          // Respond to item press.
+          setState(() => _selectView(value));
+        },
+        items: [
+          BottomNavigationBarItem(
+            title: Text('Schedule'),
+            icon: Icon(Icons.date_range),
+          ),
+          BottomNavigationBarItem(
+            title: Text('Recipes'),
+            icon: Icon(Icons.restaurant_menu),
+          ),
+          BottomNavigationBarItem(
+            title: Text('Ingredients'),
+            icon: Icon(Icons.shopping_basket),
+          ),
+        ],
       ),
     );
   }
