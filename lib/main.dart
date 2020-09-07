@@ -1,6 +1,9 @@
+import 'package:tabetai2_flutter/ingredient_list.dart';
+import 'package:tabetai2_flutter/recipe_list.dart';
+import 'package:tabetai2_flutter/wamp_session.dart';
+
 import 'package:flutter/material.dart';
 
-import 'wamp_session.dart';
 
 void main() async {
   var session = WampSession("localhost");
@@ -62,17 +65,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final WampSession _session;
-  List<String> _ingredients = [];
-  List<String> _recipes = [];
   int _currentIndex = 0;
-  Widget _scheduleView = Text('No schedule view yet!');
-  Widget _recipeListView = Text('No recipes to show');
-  Widget _ingredientListView = Text('No ingredients to show');
+
+  Widget _scheduleView;
+  RecipeList _recipeListView;
+  IngredientList _ingredientListView;
 
   Widget _currentView;
 
   _HomePageState(this._session) {
-    _subscribeToTopics();
+    _scheduleView = Text('No schedule view yet!');
+    _ingredientListView = IngredientList(_session);
+    _recipeListView = RecipeList(_session);
     _currentView = _scheduleView;
   }
 
@@ -86,43 +90,6 @@ class _HomePageState extends State<HomePage> {
     } else if (_currentIndex == 2) {
       _currentView = _ingredientListView;
     }
-  }
-
-  void _updateIngredients(List<dynamic> ingredientList) {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _ingredients = [];
-      for (dynamic ingredient in ingredientList) {
-        _ingredients.add(ingredient[1]);
-      }
-      _ingredientListView = Text('$_ingredients');
-    });
-  }
-
-  void _updateRecipes(List<dynamic> recipeList) {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _recipes = [];
-      for (dynamic recipe in recipeList) {
-        _recipes.add(recipe[1]);
-      }
-      _recipeListView = Text('$_recipes');
-    });
-  }
-
-  void _subscribeToTopics() async {
-    await _session.subscribe(
-        'com.tabetai2.ingredients', (data) => _updateIngredients(data));
-    await _session.subscribe(
-        'com.tabetai2.recipes', (data) => _updateRecipes(data));
   }
 
   @override
