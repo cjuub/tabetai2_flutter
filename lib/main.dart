@@ -71,13 +71,26 @@ class _HomePageState extends State<HomePage> {
   RecipeList _recipeListView;
   IngredientList _ingredientListView;
 
+  List<dynamic> _ingredientData = [];
+  List<dynamic> _recipeData = [];
+
   Widget _currentView;
 
   _HomePageState(this._session) {
-    _scheduleView = Text('No schedule view yet!');
-    _ingredientListView = IngredientList(_session);
-    _recipeListView = RecipeList(_session);
+    _scheduleView = Text("No schedule view yet!");
+    _recipeListView = RecipeList([], []);
+    _ingredientListView = IngredientList([]);
+
     _currentView = _scheduleView;
+
+    _subscribeToTopics();
+  }
+
+  void _subscribeToTopics() {
+    _session.subscribe("com.tabetai2.recipes",
+            (data) => setState(() => _recipeData = data));
+    _session.subscribe("com.tabetai2.ingredients",
+            (data) => setState(() => _ingredientData = data));
   }
 
   void _selectView(int value) {
@@ -94,6 +107,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -102,6 +116,10 @@ class _HomePageState extends State<HomePage> {
     // than having to individually change instances of widgets.
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    _scheduleView = Text('No schedule view yet!');
+    _ingredientListView = IngredientList(_ingredientData);
+    _recipeListView = RecipeList(_recipeData, _ingredientData);
 
     return Scaffold(
       appBar: AppBar(

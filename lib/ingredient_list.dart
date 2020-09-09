@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:tabetai2_flutter/wamp_session.dart';
 
 class IngredientList extends StatefulWidget {
-  final WampSession _session;
-  List<dynamic> _ingredientData = [];
+  List<dynamic> _ingredientData;
 
-  IngredientList(this._session) {
-    _session.subscribe("com.tabetai2.ingredients", (data) => _update(data));
-  }
-
-  void _update(List<dynamic> data) {
-    _ingredientData = data;
-  }
+  IngredientList(this._ingredientData);
 
   @override
   State<StatefulWidget> createState() => _IngredientListState();

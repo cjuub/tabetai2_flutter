@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:tabetai2_flutter/recipe_view.dart';
-import 'package:tabetai2_flutter/wamp_session.dart';
 
 class RecipeList extends StatefulWidget {
-  final WampSession _session;
-  List<dynamic> _recipeData = [];
+  List<dynamic> _recipeData;
+  List<dynamic> _ingredientData;
 
-  RecipeList(this._session) {
-    _session.subscribe("com.tabetai2.recipes", (data) => _update(data));
-  }
-
-  void _update(List<dynamic> data) {
-    _recipeData = data;
-  }
+  RecipeList(this._recipeData, this._ingredientData);
 
   @override
   State<StatefulWidget> createState() => _RecipeListState();
@@ -39,8 +32,7 @@ class _RecipeListState extends State<RecipeList> {
 
         itemBuilder: (BuildContext context, int index) {
           return GestureDetector(
-//            onTap: () => print(widget._recipeData[index]),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeView(widget._recipeData[index]))),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeView(widget._recipeData[index], widget._ingredientData))),
             child: Container(
               height: 50,
               child: Center(child: Text('${_recipeNames[index]}')),
