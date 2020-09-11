@@ -4,6 +4,8 @@ import 'package:tabetai2_flutter/wamp_session.dart';
 
 import 'package:flutter/material.dart';
 
+import 'add_recipe_view.dart';
+
 
 void main() async {
   var session = WampSession("localhost");
@@ -149,6 +151,11 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[_currentView],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AddRecipeView(_ingredientData))),
+        tooltip: 'Add',
+        child: Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,

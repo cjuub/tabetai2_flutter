@@ -25,4 +25,8 @@ class WampSession {
     subscription.eventStream.listen((event) => callback(event.arguments));
     return subscription;
   }
+
+  void call(String topic, List<dynamic> args) async {
+    _session.call(topic, arguments: args);
+  }
 }
