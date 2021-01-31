@@ -152,7 +152,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AddRecipeView(_ingredientData))),
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AddRecipeView(_ingredientData, _session))),
         tooltip: 'Add',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

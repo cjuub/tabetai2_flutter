@@ -1,30 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tabetai2_flutter/wamp_session.dart';
 
 class AddRecipeView extends StatefulWidget {
   List<dynamic> _ingredientData;
+  WampSession _session;
 
-  AddRecipeView(this._ingredientData);
+  AddRecipeView(this._ingredientData, this._session);
 
   @override
-  State<StatefulWidget> createState() => _AddRecipeViewState(_ingredientData);
+  State<StatefulWidget> createState() => _AddRecipeViewState(_ingredientData, _session);
 }
 
 class _AddRecipeViewState extends State<AddRecipeView> {
   List<dynamic> _ingredientData;
+  WampSession _session;
 
   List<String> _availableUnits = ["g", "hg", "kg", "krm", "msk", "ml", "dl", "l", "pcs"];
+  Map unitMap = {"g": 0, "hg": 1, "kg": 2, "krm": 3, "msk": 4, "ml": 5, "dl": 6, "l": 7, "pcs": 8};
 
+  String _recipeName = "";
   int _servings = 4;
   List<String> _steps = [""];
-  List<String> _ingredients = [""];
+  List<String> _recipeIngredientNames = [""];
+  List<String> _recipeIngredientIds = [""];
   List<String> _amounts = [""];
   List<String> _units = [""];
-  List<String> _availableIngredients = [];
+  List<List<String>> _availableIngredients = [];
 
-  _AddRecipeViewState(this._ingredientData) {
+  _AddRecipeViewState(this._ingredientData, this._session) {
     for (dynamic ingredient in _ingredientData) {
-      _availableIngredients.add(ingredient[1]);
+      _availableIngredients.add([ingredient[0], ingredient[1]]);
     }
   }
 
@@ -40,6 +46,14 @@ class _AddRecipeViewState extends State<AddRecipeView> {
         child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
+              TextField(
+                onChanged: (value) => _recipeName = value,
+                controller: TextEditingController(text: _recipeName),
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                    hintText: 'Enter recipe name'
+                ),
+              ),
               Container(
                 width: 500,
                 child:
@@ -61,18 +75,21 @@ class _AddRecipeViewState extends State<AddRecipeView> {
                 children: <Widget>[
                   Expanded(child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: _ingredients.length,
+                      itemCount: _recipeIngredientNames.length,
                       padding: const EdgeInsets.all(8),
                       itemBuilder: (BuildContext, int index) {
                         return Expanded(child:
                         Row(children: <Widget>[
-                          Expanded(child: Text("${_ingredients[index]}")),
+                          Expanded(child: Text("${_recipeIngredientNames[index]}")),
                             DropdownButton<String>(
-                              items: _availableIngredients.map((String value) {
+                              items: _availableIngredients.map((List<String> value) {
                                 return DropdownMenuItem<String>(
-                                  value: _ingredients[index],
-                                  child: Text(value),
-                                  onTap: () => setState(() => _ingredients[index] = value),
+                                  value: _recipeIngredientNames[index],
+                                  child: Text(value[1]),
+                                  onTap: () => setState(() {
+                                    _recipeIngredientNames[index] = value[1];
+                                    _recipeIngredientIds[index] = value[0];
+                                  }),
                                 );
                               }).toList(),
                               onChanged: (_) {},
@@ -101,10 +118,13 @@ class _AddRecipeViewState extends State<AddRecipeView> {
                             }).toList(),
                             onChanged: (_) {},
                           ),
-                          RaisedButton(onPressed: () => setState(() { _ingredients.add(""); _units.add(""); _amounts.add(""); } )),
-                        ]
-                        )
-                        );
+                          RaisedButton(onPressed: () => setState(() {
+                            _recipeIngredientNames.add("");
+                            _recipeIngredientIds.add("");
+                            _units.add("");
+                            _amounts.add("");
+                          } )),
+                        ]));
                       }).build(context)),
                   Expanded(child: ListView.builder(
                       shrinkWrap: true,
@@ -129,6 +149,19 @@ class _AddRecipeViewState extends State<AddRecipeView> {
                       }).build(context)),
                 ],
               ),
+              RaisedButton(onPressed: () => setState(() {
+                List<dynamic> args = [];
+                args.add(_recipeName);
+                args.add(_servings);
+                Map ingredients = {};
+                for (int i = 0; i < _recipeIngredientIds.length; i++) {
+                    ingredients[_recipeIngredientIds[i]] =
+                        [int.parse(_amounts[i]), unitMap[_units[i]]];
+                }
+                args.add(ingredients);
+                args.add(_steps);
+                _session.call("com.tabetai2.add_recipe", args);
+              })),
             ]),
       ),
     );

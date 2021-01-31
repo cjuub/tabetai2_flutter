@@ -27,6 +27,7 @@ class WampSession {
   }
 
   void call(String topic, List<dynamic> args) async {
-    _session.call(topic, arguments: args);
+    _session.call(topic, arguments: args).listen((ev) => print(ev.arguments[0]),
+        onError: (e) {var error = e as Error; print(error.error); });
   }
 }
