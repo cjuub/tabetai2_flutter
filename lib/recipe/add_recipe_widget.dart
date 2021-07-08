@@ -41,8 +41,6 @@ class _AddRecipeViewState extends State<AddRecipeView> {
         title: Text("Add Recipe"),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
