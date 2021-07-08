@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tabetai2_flutter/recipe_view.dart';
+import 'package:tabetai2_flutter/recipe/recipe_view.dart';
 
 class RecipeList extends StatefulWidget {
   List<dynamic> _recipeData;

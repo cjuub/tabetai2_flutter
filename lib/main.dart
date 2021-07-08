@@ -1,10 +1,10 @@
-import 'package:tabetai2_flutter/ingredient_list.dart';
-import 'package:tabetai2_flutter/recipe_list.dart';
-import 'package:tabetai2_flutter/wamp_session.dart';
+import 'package:tabetai2_flutter/ingredient/ingredient_list.dart';
+import 'package:tabetai2_flutter/recipe/add_recipe_view.dart';
+import 'package:tabetai2_flutter/recipe/recipe_list.dart';
+import 'package:tabetai2_flutter/client/wamp/wamp_session.dart';
 
 import 'package:flutter/material.dart';
 
-import 'add_recipe_view.dart';
 
 
 void main() async {

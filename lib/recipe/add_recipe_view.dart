@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tabetai2_flutter/wamp_session.dart';
+import 'package:tabetai2_flutter/client/wamp/wamp_session.dart';
 
 class AddRecipeView extends StatefulWidget {
   List<dynamic> _ingredientData;
